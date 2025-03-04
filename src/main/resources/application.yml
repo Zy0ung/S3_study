@@ -1,0 +1,23 @@
+spring:
+  config:
+    import: secret.yml
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:tcp://localhost/~/file-upload
+    username: sa
+    password:
+    h2:
+      console:
+        enabled: true
+  jpa:
+    properties:
+      hibernate.dialect: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+
+minio:
+  url: ${MINIO_URL}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  region: ${MINIO_REGION}
+  bucket: ${MINIO_BUCKET}
