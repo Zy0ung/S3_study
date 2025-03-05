@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import s3.s3_study.upload.controller.request.S3UploadRequest;
 import s3.s3_study.upload.controller.response.S3FileUploadResponse;
+import s3.s3_study.upload.service.AwsS3Service;
 import s3.s3_study.upload.service.S3Service;
 
 @RestController
@@ -18,7 +19,10 @@ import s3.s3_study.upload.service.S3Service;
 @Slf4j
 public class S3Controller {
 
+    // minio S3 service
     private final S3Service s3Service;
+    // aws S3 service
+    private final AwsS3Service awsS3Service;
 
     /**
      * Presigned URL 생성
@@ -27,9 +31,12 @@ public class S3Controller {
     public S3FileUploadResponse generatePresignedUrl(
             @ModelAttribute S3UploadRequest request) {
 
-        // Presigned URL 생성
-        S3FileUploadResponse response = s3Service.generatePresignedUrl(request.getFileName(), request.getContentType());
+        // minio Presigned URL 생성
+//        S3FileUploadResponse response = s3Service.generatePresignedUrl(request.getFileName(), request.getContentType());
 
+        // AWS Presigned URL 생성
+        S3FileUploadResponse response = awsS3Service.generatePresignedUrl(request.getFileName(),
+                request.getContentType());
         return response;
     }
 
@@ -40,6 +47,10 @@ public class S3Controller {
      */
     @DeleteMapping("/delete")
     public void deleteFile(@RequestParam String fileName) {
-        s3Service.deleteFile(fileName);
+        //  minio S3 삭제
+//        s3Service.deleteFile(fileName);
+
+        // AWS S3 삭제
+        awsS3Service.deleteFile(fileName);
     }
 }

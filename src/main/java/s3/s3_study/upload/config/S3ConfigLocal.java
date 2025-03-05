@@ -50,7 +50,7 @@ public class S3ConfigLocal {
     }
 
     @Bean
-    public S3Presigner s3Presigner() {
+    public S3Presigner minioS3Presigner() {
         return S3Presigner.builder()
                 .endpointOverride(URI.create(minioUrl))
                 .region(Region.of(region))

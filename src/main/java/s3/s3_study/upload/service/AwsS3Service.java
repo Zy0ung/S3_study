@@ -9,7 +9,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import s3.s3_study.upload.MediaType;
-import s3.s3_study.upload.config.S3ConfigLocal;
+import s3.s3_study.upload.config.S3Config;
 import s3.s3_study.upload.controller.response.S3FileUploadResponse;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
@@ -21,12 +21,12 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequ
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class S3Service {
+public class AwsS3Service {
 
-    private final S3Client minioClient;
-    private final S3Presigner minioS3Presigner;
-    private final S3ConfigLocal s3ConfigLocal;
-    @Value("${minio.bucket}")
+    private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
+    private final S3Config s3Config;
+    @Value("${aws.bucket}")
     private String bucket;
 
     /**
@@ -58,14 +58,15 @@ public class S3Service {
             Duration expiration = Duration.ofMinutes(5);
 
             // PresignedPutObjectRequest 생성 (Presigner를 사용하여 Presigned URL을 생성)
-            PresignedPutObjectRequest presignedPutObjectRequest = minioS3Presigner.presignPutObject(
+            PresignedPutObjectRequest presignedPutObjectRequest = s3Presigner.presignPutObject(
                     presignRequest -> presignRequest.putObjectRequest(putObjectRequest)
                             .signatureDuration(expiration)
             );
 
+            // TODO:: URL에 버킷명 노출 고려
             S3FileUploadResponse response = S3FileUploadResponse.createResponse(
                     presignedPutObjectRequest.url().toString(),
-                    s3ConfigLocal.getMinioUrl() + "/" + bucket + "/" + uniqueFileName
+                    "https://" + bucket + ".s3." + s3Config.getRegion() + ".amazonaws.com/" + uniqueFileName
             );
 
             return response;
@@ -89,7 +90,7 @@ public class S3Service {
                     .key(fileName)
                     .build();
 
-            minioClient.deleteObject(deleteObjectRequest);
+            s3Client.deleteObject(deleteObjectRequest);
             return true;
         } catch (S3Exception e) {
             throw new RuntimeException("S3 URL 삭제 실패");
