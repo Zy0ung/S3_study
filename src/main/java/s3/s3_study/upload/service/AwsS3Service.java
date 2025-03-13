@@ -9,7 +9,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import s3.s3_study.upload.MediaType;
-import s3.s3_study.upload.config.S3Config;
 import s3.s3_study.upload.dto.response.S3FileUploadResponse;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
@@ -25,7 +24,6 @@ public class AwsS3Service {
 
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
-    private final S3Config s3Config;
     @Value("${aws.bucket}")
     private String bucket;
 
