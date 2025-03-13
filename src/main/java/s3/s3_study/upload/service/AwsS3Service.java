@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import s3.s3_study.upload.MediaType;
 import s3.s3_study.upload.config.S3Config;
-import s3.s3_study.upload.controller.response.S3FileUploadResponse;
+import s3.s3_study.upload.dto.response.S3FileUploadResponse;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -63,14 +63,17 @@ public class AwsS3Service {
                             .signatureDuration(expiration)
             );
 
-            // TODO:: URL에 버킷명 노출 고려
+            final String downloadUrl = "https://" + bucket + ".s3." + s3Config.getRegion() + ".amazonaws.com/";
+
             S3FileUploadResponse response = S3FileUploadResponse.createResponse(
                     presignedPutObjectRequest.url().toString(),
-                    "https://" + bucket + ".s3." + s3Config.getRegion() + ".amazonaws.com/" + uniqueFileName
+                    downloadUrl + uniqueFileName
             );
 
             return response;
+
         } catch (Exception e) {
+            log.error("S3 Presigned URL 생성 실패: {}", e.getMessage(), e);
             throw new RuntimeException("S3 URL 생성 실패");
         }
     }
@@ -93,6 +96,7 @@ public class AwsS3Service {
             s3Client.deleteObject(deleteObjectRequest);
             return true;
         } catch (S3Exception e) {
+            log.error("S3 파일 삭제 실패: {}", e.awsErrorDetails().errorMessage(), e);
             throw new RuntimeException("S3 URL 삭제 실패");
         }
     }
@@ -106,10 +110,16 @@ public class AwsS3Service {
         String fileExtension = FilenameUtils.getExtension(fileName).toLowerCase();
 
         if (!isValidMimeType(contentType, fileExtension)) {
-            throw new ValidationException("MIME 타입 또는 확장자를 확인해주세요");
+            String errorMsg = String.format("유효하지 않은 MIME 타입 또는 확장자입니다. contentType=%s, extension=%s", contentType,
+                    fileExtension);
+            log.warn(errorMsg);
+            throw new ValidationException(errorMsg);
         }
     }
 
+    /**
+     * 유효한 MIME 타입 및 확장자 체크
+     */
     private boolean isValidMimeType(String contentType, String fileExtension) {
         for (MediaType type : MediaType.values()) {
             if (type.getValue().equals(contentType)) {

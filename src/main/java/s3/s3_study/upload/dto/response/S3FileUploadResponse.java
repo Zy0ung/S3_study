@@ -1,4 +1,4 @@
-package s3.s3_study.upload.controller.response;
+package s3.s3_study.upload.dto.response;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
