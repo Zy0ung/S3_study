@@ -61,8 +61,7 @@ public class AwsS3Service {
                             .signatureDuration(expiration)
             );
 
-            // CloudFront 주소 도메인 주소로 변경 필요
-            final String downloadUrl = "https://dmxnb83aje380.cloudfront.net/";
+            final String downloadUrl = "CloudFront랑 연결한 도메인 주소";
 
             S3FileUploadResponse response = S3FileUploadResponse.createResponse(
                     presignedPutObjectRequest.url().toString(),
